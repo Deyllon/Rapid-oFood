@@ -33,6 +33,13 @@ export class User {
   email: string;
   @Prop()
   password: string;
+  @Prop({
+    type: String,
+    enum: ['Mexica', 'Japanese', 'Brazilian', 'None'],
+    required: false,
+    default: 'None',
+  })
+  preference: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
