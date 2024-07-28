@@ -16,12 +16,11 @@ export class User {
   @Prop()
   age: number;
 
-  @Prop()
-  latitude: number;
-
-  @Prop()
-  longitude: number;
-
+  @Prop({
+    type: { type: String },
+    coordinates: [],
+  })
+  location: number;
   @Prop({
     type: String,
     trim: true,
@@ -35,11 +34,15 @@ export class User {
   password: string;
   @Prop({
     type: String,
-    enum: ['Mexica', 'Japanese', 'Brazilian', 'None'],
+    enum: ['Mexican', 'Japanese', 'Brazilian', 'None'],
     required: false,
     default: 'None',
   })
   preference: string;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index({ location: '2dsphere' });
+
+export { UserSchema };

@@ -21,13 +21,26 @@ export class UserService {
   ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const user = new this.userModel(createUserDto);
+      const { latitude, longitude, ...rest } = createUserDto;
+      const user = new this.userModel({
+        location: {
+          type: 'Point',
+          coordinates: [longitude, latitude],
+        },
+        ...rest,
+      });
       const savedUser = await user.save();
       this.logClient.emit(
         'succesfulyRegister',
         JSON.stringify({
           user: user,
           dateTimeOfRegist: Date.now(),
+        }),
+      );
+      this.userClient.emit(
+        'group_user',
+        JSON.stringify({
+          user: user,
         }),
       );
       return savedUser;
