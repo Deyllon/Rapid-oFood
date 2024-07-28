@@ -18,6 +18,13 @@ export class GroupedUser {
     required: true,
   })
   users: Types.ObjectId[];
+  @Prop({
+    type: String,
+    enum: ['Mexican', 'Japanese', 'Brazilian', 'None'],
+    required: false,
+    default: 'None',
+  })
+  preference: string;
 }
 
 const GroupedUserSchema = SchemaFactory.createForClass(GroupedUser);

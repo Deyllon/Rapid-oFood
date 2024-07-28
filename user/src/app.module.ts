@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GroupedUser, GroupedUserSchema } from './schema/groupUset.schema';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -14,6 +15,21 @@ import { GroupedUser, GroupedUserSchema } from './schema/groupUset.schema';
     MongooseModule.forFeature([
       { name: GroupedUser.name, schema: GroupedUserSchema },
     ]),
+    ClientsModule.register([
+      {
+        name: 'log_service',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'log',
+            brokers: ['localhost:9092'],
+          },
+          consumer: {
+            groupId: 'log-consumer',
+          },
+        },
+      },
+    ])
   ],
   controllers: [AppController],
   providers: [AppService],
