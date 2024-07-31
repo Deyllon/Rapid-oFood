@@ -11,13 +11,15 @@ import { User } from './schema/user.schema';
 import { Model } from 'mongoose';
 import { ClientKafka } from '@nestjs/microservices';
 import { Login } from 'src/types/login.type';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
     @Inject('user_service') private readonly userClient: ClientKafka,
     @Inject('log_service') private readonly logClient: ClientKafka,
+    private readonly jwtService: JwtService,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
@@ -54,7 +56,7 @@ export class UserService {
       );
       console.log(error);
       throw new InternalServerErrorException('Try again later', {
-        cause: new Error(),
+        cause: error,
         description: 'Something happened',
       });
     }
@@ -64,8 +66,9 @@ export class UserService {
     return this.userModel.findOne({ email: email, password: password });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     try {
+      console.log('slalal', id);
       const user = await this.userModel.findByIdAndUpdate(id, updateUserDto);
       this.logClient.emit(
         'succesfulyUpdate',
@@ -83,8 +86,8 @@ export class UserService {
           dateTimeOfRegist: Date.now(),
         }),
       );
-      throw new InternalServerErrorException('Try again later', {
-        cause: new Error(),
+      throw new InternalServerErrorException(error.message, {
+        cause: error,
         description: 'Something happened',
       });
     }
@@ -116,7 +119,7 @@ export class UserService {
     }
   }
 
-  async login(login: Login): Promise<User> {
+  async login(login: Login): Promise<{ access_token: string }> {
     const user = await this.findOne(login.email, login.password);
     if (!user) {
       throw new BadRequestException('Wrong email or password', {
@@ -124,6 +127,7 @@ export class UserService {
         description: 'Wrong email or password',
       });
     }
+    const payload = { sub: user.email, username: user.name };
     this.logClient.emit(
       'login',
       JSON.stringify({
@@ -132,6 +136,8 @@ export class UserService {
         dateTimeOfLogin: Date.now(),
       }),
     );
-    return user;
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
   }
 }

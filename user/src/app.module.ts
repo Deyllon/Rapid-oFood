@@ -4,12 +4,17 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GroupedUser, GroupedUserSchema } from './schema/groupUset.schema';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRootAsync({
-      useFactory: () => ({
-        uri: 'mongodb://root:example@localhost:27017/',
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_STRING'),
       }),
     }),
     MongooseModule.forFeature([
@@ -29,7 +34,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           },
         },
       },
-    ])
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],

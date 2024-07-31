@@ -11,9 +11,8 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @EventPattern('group_user')
-  groupUser(data: any) {
+  @EventPattern('succesfulyRegister')
+  registerLog(data: any) {
     console.log(data);
-    this.appService.groupUser(data.user);
   }
 }
