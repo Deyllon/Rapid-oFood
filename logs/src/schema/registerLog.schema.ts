@@ -1,33 +1,33 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
-export type GroupedUserDocument = HydratedDocument<GroupedUser>;
+export type RegisterUserDocument = HydratedDocument<RegisterUser>;
 
 @Schema()
-export class GroupedUser {
+export class RegisterUser {
+  @Prop()
+  name: string;
+
+  @Prop()
+  age: number;
+
   @Prop({
-    type: {
-      type: String,
-    },
+    type: { type: String },
     coordinates: [],
   })
   location: number;
-
-  @Prop({
-    type: [{ type: Types.ObjectId, ref: 'User' }],
-    required: true,
-  })
-  users: Types.ObjectId[];
-  @Prop({
-    type: String,
-    enum: ['Mexican', 'Japanese', 'Brazilian', 'None'],
-    required: false,
-    default: 'None',
-  })
+  @Prop()
+  email: string;
+  @Prop()
+  password: string;
+  @Prop()
   preference: string;
+
+  @Prop()
+  dateTimeOfRegist: Date;
 }
 
-const GroupedUserSchema = SchemaFactory.createForClass(GroupedUser);
-GroupedUserSchema.index({ location: '2dsphere' });
+const RegisterUserSchema = SchemaFactory.createForClass(RegisterUser);
+RegisterUserSchema.index({ location: '2dsphere' });
 
-export { GroupedUserSchema };
+export { RegisterUserSchema };

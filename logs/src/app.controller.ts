@@ -13,6 +13,6 @@ export class AppController {
 
   @EventPattern('succesfulyRegister')
   registerLog(data: any) {
-    console.log(data);
+    this.appService.registerLog(data);
   }
 }
