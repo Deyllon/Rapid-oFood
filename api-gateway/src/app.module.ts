@@ -5,11 +5,13 @@ import { PurchaseModule } from './purchase/purchase.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { StoreModule } from './store/store.module';
 
 @Module({
   imports: [
     PurchaseModule,
     UserModule,
+    StoreModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

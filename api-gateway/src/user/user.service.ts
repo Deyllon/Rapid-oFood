@@ -12,6 +12,7 @@ import { Model } from 'mongoose';
 import { ClientKafka } from '@nestjs/microservices';
 import { Login } from 'src/types/login.type';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -23,12 +24,13 @@ export class UserService {
   ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const { latitude, longitude, ...rest } = createUserDto;
+      const { latitude, longitude, password, ...rest } = createUserDto;
       const user = new this.userModel({
         location: {
           type: 'Point',
           coordinates: [longitude, latitude],
         },
+        password: await bcrypt.hash(password, 10),
         ...rest,
       });
       const savedUser = await user.save();
@@ -62,8 +64,18 @@ export class UserService {
     }
   }
 
-  findOne(email: string, password: string): Promise<User> {
-    return this.userModel.findOne({ email: email, password: password });
+  async findOne(email: string, password: string): Promise<User> {
+    const user = await this.userModel.findOne({
+      email: email,
+    });
+    if (!user) {
+      throw new BadRequestException('Email incorreto');
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      return user;
+    }
+    throw new BadRequestException('Senha invalida');
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -121,12 +133,6 @@ export class UserService {
 
   async login(login: Login): Promise<{ access_token: string }> {
     const user = await this.findOne(login.email, login.password);
-    if (!user) {
-      throw new BadRequestException('Wrong email or password', {
-        cause: new Error(),
-        description: 'Wrong email or password',
-      });
-    }
     const payload = { sub: user.email, username: user.name };
     this.logClient.emit(
       'login',
