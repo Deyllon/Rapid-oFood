@@ -9,20 +9,22 @@ import { Purchase, PurchaseSchema } from './schema/purchase.schema';
   imports: [
     ClientsModule.register([
       {
-        name: 'Teste_SERVICE',
+        name: 'purchase_service',
         transport: Transport.KAFKA,
         options: {
           client: {
-            clientId: 'teste',
+            clientId: 'purchase',
             brokers: ['localhost:9092'],
           },
           consumer: {
-            groupId: 'teste-consumer',
+            groupId: 'purchase-consumer',
           },
         },
       },
     ]),
-    MongooseModule.forFeature([{ name: Purchase.name, schema: PurchaseSchema }]),
+    MongooseModule.forFeature([
+      { name: Purchase.name, schema: PurchaseSchema },
+    ]),
   ],
   controllers: [PurchaseController],
   providers: [PurchaseService],

@@ -1,21 +1,27 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
-import { ClientKafka } from '@nestjs/microservices';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 
 @Controller('purchase')
 export class PurchaseController {
-  constructor(
-    private readonly purchaseService: PurchaseService,
-  ) {}
+  constructor(private readonly purchaseService: PurchaseService) {}
 
-  @Get()
-  getHello(): string {
-    return this.purchaseService.getHello();
+  @Get(':id')
+  getPurchase(@Param('id') store: string, @Query('date') date: Date) {
+    return this.purchaseService.getPurchase(store, date);
+  }
+
+  @Get(':id')
+  getFilteredPurchase(
+    @Param('id') store: string,
+    @Query('startDate') startDate: Date,
+    @Query('endDate') endDate: Date,
+  ) {
+    return this.purchaseService.getFilteredPurchase(store, startDate, endDate);
   }
 
   @Post()
-  buy(@Body() createPurchaseDto: CreatePurchaseDto){
-    this.purchaseService.buy(createPurchaseDto)
+  buy(@Body() createPurchaseDto: CreatePurchaseDto) {
+    this.purchaseService.buy(createPurchaseDto);
   }
 }

@@ -25,7 +25,6 @@ export class StoreController {
     return this.storeService.create(createStoreDto);
   }
 
-  
   @Get()
   findAll(
     @Query('page') page: number,
@@ -52,7 +51,10 @@ export class StoreController {
   }
 
   @Patch(':email')
-  update(@Param('email') email: string, @Body() updateStoreDto: UpdateStoreDto) {
+  update(
+    @Param('email') email: string,
+    @Body() updateStoreDto: UpdateStoreDto,
+  ) {
     return this.storeService.update(email, updateStoreDto);
   }
 
