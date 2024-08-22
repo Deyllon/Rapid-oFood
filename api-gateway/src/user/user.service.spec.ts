@@ -80,8 +80,6 @@ describe('UserService', () => {
       jest
         .spyOn(userModel, 'create')
         .mockImplementationOnce(() => Promise.resolve(savedUser));
-
-      // Mock bcrypt.hash para retornar um valor hash
       jest
         .spyOn(bcrypt, 'hash')
         .mockResolvedValue(Promise.resolve('hashedPassword') as never);
@@ -89,12 +87,6 @@ describe('UserService', () => {
       jest
         .spyOn(userModel, 'create')
         .mockImplementationOnce(() => Promise.resolve(savedUser));
-
-      // Mock da instância retornada ao criar um novo documento com o modelo
-
-      // Mock do construtor do modelo como um construtor que retorna a instância mockada
-
-      // Invoca o serviço e verifica o resultado
       const result = await service.create(createUser);
 
       expect(bcrypt.hash).toHaveBeenCalledWith('@Manha27', 10);
