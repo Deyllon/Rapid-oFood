@@ -25,7 +25,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       const { latitude, longitude, password, ...rest } = createUserDto;
-      const user = new this.userModel({
+      const user = await this.userModel.create({
         location: {
           type: 'Point',
           coordinates: [longitude, latitude],
@@ -33,7 +33,7 @@ export class UserService {
         password: await bcrypt.hash(password, 10),
         ...rest,
       });
-      const savedUser = await user.save();
+
       this.logClient.emit(
         'succesfulyRegister',
         JSON.stringify({
@@ -47,7 +47,7 @@ export class UserService {
           user: user,
         }),
       );
-      return savedUser;
+      return user;
     } catch (error) {
       this.logClient.emit(
         'register',

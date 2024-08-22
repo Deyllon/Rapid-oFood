@@ -17,20 +17,34 @@ export class PurchaseService {
     @Inject('purchase_service') private readonly purchase_service: ClientKafka,
   ) {}
   getPurchase(store: string, date: Date) {
-    return this.purchaseModel.findOne({
-      store: store,
-      date: date,
-    });
+    try {
+      return this.purchaseModel.findOne({
+        store: store,
+        date: date,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error.message, {
+        cause: error,
+        description: 'Something happened',
+      });
+    }
   }
 
   getFilteredPurchase(store: string, startDate: Date, endDate: Date) {
-    return this.purchaseModel.findOne({
-      store: store,
-      date: {
-        $gte: startDate,
-        $lt: endDate,
-      },
-    });
+    try {
+      return this.purchaseModel.findOne({
+        store: store,
+        date: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error.message, {
+        cause: error,
+        description: 'Something happened',
+      });
+    }
   }
 
   buy(createPurchaseDto: CreatePurchaseDto) {

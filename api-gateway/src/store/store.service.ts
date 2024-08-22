@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -184,47 +188,59 @@ export class StoreService {
   }
 
   async update(email: string, updateStoreDto: UpdateStoreDto) {
-    const {password, ...rest} = updateStoreDto
-    if(!password){
+    try {
+      const { password, ...rest } = updateStoreDto;
+      if (!password) {
+        return this.storeModel.findOneAndUpdate(
+          {
+            email: email,
+          },
+          {
+            $set: { ...rest },
+          },
+          {
+            new: true,
+          },
+        );
+      }
       return this.storeModel.findOneAndUpdate(
         {
-          email:email
+          email: email,
         },
         {
-          $set: {...rest}
+          $set: {
+            password: await bcrypt.hash(password, 10),
+            ...rest,
+          },
         },
         {
-          new: true
-        }
-      )
+          new: true,
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
-    return this.storeModel.findOneAndUpdate(
-      {
-        email:email
-      },
-      {
-        $set: {
-          password: await bcrypt.hash(password, 10),
-          ...rest
-        }
-      },
-      {
-        new: true
-      }
-    )
   }
 
   remove(email: string) {
-    return this.storeModel.deleteOne({
-      email:email
-    });
+    try {
+      return this.storeModel.deleteOne({
+        email: email,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async login(login: Login): Promise<{ access_token: string }> {
-    const store = await this.findOne(login.email, login.password);
-    const payload = { sub: store.email, username: store.name };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+    try {
+      const store = await this.findOne(login.email, login.password);
+      const payload = { sub: store.email, username: store.name };
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }
