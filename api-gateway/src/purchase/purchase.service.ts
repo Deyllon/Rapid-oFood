@@ -58,10 +58,7 @@ export class PurchaseService {
 
       return response.status(200);
     } catch (error) {
-      throw new InternalServerErrorException(error.message, {
-        cause: error,
-        description: 'Something happened',
-      });
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

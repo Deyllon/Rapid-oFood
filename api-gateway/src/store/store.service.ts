@@ -22,7 +22,8 @@ export class StoreService {
   async create(createStoreDto: CreateStoreDto) {
     try {
       const { latitude, longitude, password, ...rest } = createStoreDto;
-      const store = new this.storeModel({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const store = await this.storeModel.create({
         location: {
           type: 'Point',
           coordinates: [longitude, latitude],
@@ -31,7 +32,7 @@ export class StoreService {
         ...rest,
       });
 
-      await store.save();
+      return store;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('Try again later', {

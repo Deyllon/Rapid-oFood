@@ -6,7 +6,10 @@ import { ClientKafka } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
 import { User } from './schema/user.schema';
 import mongoose, { Model } from 'mongoose';
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 describe('UserService', () => {
   let service: UserService;
@@ -37,6 +40,9 @@ describe('UserService', () => {
           useValue: {
             create: jest.fn(),
             findByIdAndUpdate: jest.fn(),
+            findOne: jest.fn(),
+            findByIdAndDelete: jest.fn(),
+            login: jest.fn(),
           },
         },
         {
@@ -84,9 +90,6 @@ describe('UserService', () => {
         .spyOn(bcrypt, 'hash')
         .mockResolvedValue(Promise.resolve('hashedPassword') as never);
 
-      jest
-        .spyOn(userModel, 'create')
-        .mockImplementationOnce(() => Promise.resolve(savedUser));
       const result = await service.create(createUser);
 
       expect(bcrypt.hash).toHaveBeenCalledWith('@Manha27', 10);
@@ -144,6 +147,94 @@ describe('UserService', () => {
         InternalServerErrorException,
       );
       expect(logClient.emit).toHaveBeenCalledWith('update', expect.any(String));
+    });
+  });
+
+  describe('findOne', () => {
+    it('should find one', async () => {
+      jest.spyOn(userModel, 'findOne').mockResolvedValue(savedUser);
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
+      const result = await service.findOne(savedUser.email, savedUser.password);
+
+      expect(userModel.findOne).toHaveBeenCalledWith({
+        email: savedUser.email,
+      });
+
+      expect(result.name).toEqual(savedUser.name);
+    });
+
+    it('should throw bad request error', async () => {
+      jest
+        .spyOn(userModel, 'findOne')
+        .mockRejectedValue(new BadRequestException('Email incorreto'));
+      await expect(
+        service.findOne(savedUser.email, savedUser.password),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw bad request error', async () => {
+      jest.spyOn(userModel, 'findOne').mockResolvedValue(savedUser);
+      jest.spyOn(bcrypt, 'compare').mockImplementationOnce(() => {
+        throw new BadRequestException('Senha invalida');
+      });
+
+      await expect(
+        service.findOne(savedUser.email, savedUser.password),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove user', async () => {
+      jest.spyOn(userModel, 'findByIdAndDelete').mockResolvedValue(savedUser);
+      const result = await service.remove(savedUser.id);
+
+      expect(userModel.findByIdAndDelete).toHaveBeenCalledWith(savedUser.id);
+
+      expect(result.name).toEqual(savedUser.name);
+      expect(logClient.emit).toHaveBeenCalledWith(
+        'succesfulyDelete',
+        expect.any(String),
+      );
+    });
+    it('should throw InternalServerErrorException', async () => {
+      jest
+        .spyOn(userModel, 'findByIdAndDelete')
+        .mockRejectedValue(new InternalServerErrorException('Try again later'));
+      await expect(service.remove(savedUser.id)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      expect(logClient.emit).toHaveBeenCalledWith('delete', expect.any(String));
+    });
+  });
+
+  describe('login', () => {
+    const token = 'mockToken';
+    it('should login', async () => {
+      jest.spyOn(userModel, 'findOne').mockResolvedValue(savedUser);
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
+      jest
+        .spyOn(jwtServiceMock, 'signAsync')
+        .mockReturnValue(Promise.resolve(token));
+
+      const result = await service.login({
+        email: savedUser.email,
+        password: savedUser.password,
+      });
+
+      expect(userModel.findOne).toHaveBeenCalledWith({
+        email: savedUser.email,
+      });
+      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith({
+        sub: savedUser.email,
+        username: savedUser.name,
+      });
+      expect(result).toEqual({ access_token: token });
+      expect(logClient.emit).toHaveBeenCalledWith('login', expect.any(String));
     });
   });
 });
