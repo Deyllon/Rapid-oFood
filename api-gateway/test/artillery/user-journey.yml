@@ -1,0 +1,37 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 20
+      arrivalRate: 200
+  processor: "../faker/user.js"
+scenarios:
+  - flow:
+      - post:
+          url: "/user"  
+          beforeRequest: generateFakeUserData
+          json:
+            name: "{{name}}"
+            email: "{{email}}"
+            password: "{{password}}"
+            age: "{{age}}"
+            latitude: "{{latitude}}"
+            longitude : "{{longitude}}"
+      - think: 3
+      - post:
+          url: "/user/login"  
+          json:
+            email: "{{email}}"
+            password: "{{password}}"
+          capture:
+            - json: "$.access_token"
+              as: "token"
+      - think: 5
+      - get:
+          url: "/store"
+          qs:
+            page: "1"
+            latitude: "-26.272"
+            longitude: "3.5634"
+            maxDistance: "200000"
+          headers:
+            Authorization: "Bearer {{token}}"

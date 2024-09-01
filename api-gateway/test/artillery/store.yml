@@ -1,0 +1,19 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 10
+      arrivalRate: 200
+  processor: "../faker/store.js"
+scenarios:
+  - flow:
+      - post:
+          url: "/store"  
+          beforeRequest: generateFakeStoreData
+          json:
+            name: "{{name}}"
+            email: "{{email}}"
+            password: "{{password}}"
+            typeOfFood: "{{typeOfFood}}"
+            latitude: "{{latitude}}"
+            longitude : "{{longitude}}"
+      
