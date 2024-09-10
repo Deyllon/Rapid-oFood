@@ -14,7 +14,7 @@ import { Purchase, PurchaseSchema } from './schema/purchase.schema';
         options: {
           client: {
             clientId: 'purchase',
-            brokers: ['localhost:9092'],
+            brokers: ['kafka:9092'],
           },
           consumer: {
             groupId: 'purchase-consumer',

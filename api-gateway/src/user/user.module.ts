@@ -19,7 +19,7 @@ import { ConfigService } from '@nestjs/config';
         options: {
           client: {
             clientId: 'log',
-            brokers: ['localhost:9092'],
+            brokers: [process.env.KAFKA || 'kafka:9092'],
           },
           consumer: {
             groupId: 'log-consumer',
@@ -34,7 +34,7 @@ import { ConfigService } from '@nestjs/config';
         options: {
           client: {
             clientId: 'user',
-            brokers: ['localhost:9092'],
+            brokers: [process.env.KAFKA || 'kafka:9092'],
           },
           consumer: {
             groupId: 'user-consumer',

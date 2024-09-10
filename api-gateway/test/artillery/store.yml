@@ -1,8 +1,8 @@
 config:
-  target: "http://localhost:3000"
+  target: "http://localhost:1000"
   phases:
     - duration: 10
-      arrivalRate: 200
+      arrivalRate: 100
   processor: "../faker/store.js"
 scenarios:
   - flow:
