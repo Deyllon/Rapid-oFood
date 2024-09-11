@@ -15,4 +15,19 @@ export class AppController {
   registerLog(data: any) {
     this.appService.registerLog(data);
   }
+
+  @EventPattern('storeSuccesfulyRegister')
+  storeRegisterLog(data: any) {
+    this.appService.storeRegisterLog(data);
+  }
+
+  @EventPattern('storeSuccesfulyDeleted')
+  storeDeletedLog(data: any) {
+    this.appService.storeDeletedLog(data);
+  }
+
+  @EventPattern('purchaseCompleted')
+  purchaseLog(data: any) {
+    this.appService.purchaseLog(data);
+  }
 }

@@ -4,6 +4,18 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RegisterUser, RegisterUserSchema } from './schema/registerLog.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import {
+  RegisterStore,
+  RegisterStoreSchema,
+} from './schema/registerStoreLog.schema';
+import {
+  DeletedStore,
+  DeletedStoreSchema,
+} from './schema/deletedStoreLog.schema';
+import {
+  PurchaseLog,
+  PurchaseLogSchema,
+} from './schema/succesfullPurchase.schema';
 
 @Module({
   imports: [
@@ -18,6 +30,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     MongooseModule.forFeature([
       { name: RegisterUser.name, schema: RegisterUserSchema },
+    ]),
+
+    MongooseModule.forFeature([
+      { name: RegisterStore.name, schema: RegisterStoreSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: DeletedStore.name, schema: DeletedStoreSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: PurchaseLog.name, schema: PurchaseLogSchema },
     ]),
   ],
   controllers: [AppController],

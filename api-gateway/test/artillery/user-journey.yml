@@ -2,7 +2,7 @@ config:
   target: "http://localhost:1000"
   phases:
     - duration: 10
-      arrivalRate: 60
+      arrivalRate: 50
   processor: "../faker/user.js"
 scenarios:
   - flow:

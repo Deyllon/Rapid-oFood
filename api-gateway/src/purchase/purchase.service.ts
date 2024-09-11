@@ -15,6 +15,7 @@ export class PurchaseService {
   constructor(
     @InjectModel(Purchase.name) private readonly purchaseModel: Model<Purchase>,
     @Inject('purchase_service') private readonly purchase_service: ClientKafka,
+    @Inject('log_service') private readonly logClient: ClientKafka,
   ) {}
   getPurchase(store: string, date: Date) {
     try {
@@ -53,6 +54,14 @@ export class PurchaseService {
         'purchase',
         JSON.stringify({
           order: createPurchaseDto,
+        }),
+      );
+
+      this.logClient.emit(
+        'purchaseCompleted',
+        JSON.stringify({
+          purchase: createPurchaseDto,
+          dateTimeOfRegist: Date.now(),
         }),
       );
 

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -12,11 +13,13 @@ import * as bcrypt from 'bcrypt';
 import { TypeOfFood } from './enum/typeOfFood.enum';
 import { Login } from 'src/types/login.type';
 import { JwtService } from '@nestjs/jwt';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class StoreService {
   constructor(
     @InjectModel(Store.name) private readonly storeModel: Model<Store>,
+    @Inject('log_service') private readonly logClient: ClientKafka,
     private readonly jwtService: JwtService,
   ) {}
   async create(createStoreDto: CreateStoreDto) {
@@ -31,6 +34,14 @@ export class StoreService {
         password: await bcrypt.hash(password, 10),
         ...rest,
       });
+
+      this.logClient.emit(
+        'storeSuccesfulyRegister',
+        JSON.stringify({
+          store: store,
+          dateTimeOfRegist: Date.now(),
+        }),
+      );
 
       return store;
     } catch (error) {
@@ -192,7 +203,7 @@ export class StoreService {
     try {
       const { password, ...rest } = updateStoreDto;
       if (!password) {
-        return this.storeModel.findOneAndUpdate(
+        const store = await this.storeModel.findOneAndUpdate(
           {
             email: email,
           },
@@ -203,8 +214,10 @@ export class StoreService {
             new: true,
           },
         );
+
+        return store;
       }
-      return this.storeModel.findOneAndUpdate(
+      const store = await this.storeModel.findOneAndUpdate(
         {
           email: email,
         },
@@ -218,16 +231,26 @@ export class StoreService {
           new: true,
         },
       );
+      return store;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
-  remove(email: string) {
+  async remove(email: string) {
     try {
-      return this.storeModel.deleteOne({
+      const store = await this.storeModel.deleteOne({
         email: email,
       });
+
+      this.logClient.emit(
+        'storeSuccesfulyDeleted',
+        JSON.stringify({
+          store: email,
+          dateTimeOfRegist: Date.now(),
+        }),
+      );
+      return store;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

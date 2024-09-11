@@ -22,6 +22,21 @@ import { Purchase, PurchaseSchema } from './schema/purchase.schema';
         },
       },
     ]),
+    ClientsModule.register([
+      {
+        name: 'log_service',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            clientId: 'log',
+            brokers: [process.env.KAFKA || 'kafka:9092'],
+          },
+          consumer: {
+            groupId: 'log-consumer',
+          },
+        },
+      },
+    ]),
     MongooseModule.forFeature([
       { name: Purchase.name, schema: PurchaseSchema },
     ]),
