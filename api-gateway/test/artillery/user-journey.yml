@@ -16,6 +16,9 @@ scenarios:
             age: "{{age}}"
             latitude: "{{latitude}}"
             longitude : "{{longitude}}"
+          capture:
+            - json: "$._id"
+              as: "userId"
       - think: 3
       - post:
           url: "/user/login"  
@@ -30,8 +33,20 @@ scenarios:
           url: "/store"
           qs:
             page: "1"
-            latitude: "-26.272"
-            longitude: "3.5634"
+            latitude: "-69.2902"
+            longitude: "70.1323"
             maxDistance: "200000"
           headers:
             Authorization: "Bearer {{token}}"
+          capture:
+            - json: "$[0]._id"
+              as: "storeId"
+      - think: 3
+      - post:
+          url: "/purchase"
+          headers:
+            Authorization: "Bearer {{token}}"
+          json:
+            user: "{{userId}}"  
+            store: "{{storeId}}"
+            date: "{{date}}"

@@ -8,6 +8,7 @@ function generateFakeUserData(requestParams, ctx, ee, next) {
   ctx.vars['latitude'] = faker.location.latitude();
   ctx.vars['longitude'] = faker.location.longitude();
   ctx.vars['age'] = faker.number.int({ min: 14, max: 99 });
+  ctx.vars["date"] = Date.now()
 
   return next();
 }

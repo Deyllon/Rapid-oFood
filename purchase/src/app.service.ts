@@ -15,8 +15,8 @@ export class AppService {
       const storesCollection = this.connection.collection('stores');
       const usersCollection = this.connection.collection('users');
 
-      const objectIdStore = new mongoose.Types.ObjectId(data.store);
-      const objectIdUser = new mongoose.Types.ObjectId(data.user);
+      const objectIdStore = new mongoose.Types.ObjectId(data.store as string);
+      const objectIdUser = new mongoose.Types.ObjectId(data.user as string);
       const store = await storesCollection.findOne({
         _id: objectIdStore,
       });
