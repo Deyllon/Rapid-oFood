@@ -33,9 +33,9 @@ scenarios:
           url: "/store"
           qs:
             page: "1"
-            latitude: "-69.2902"
-            longitude: "70.1323"
-            maxDistance: "200000"
+            latitude: "-30.2902"
+            longitude: "-60.1323"
+            maxDistance: "200000000"
           headers:
             Authorization: "Bearer {{token}}"
           capture:
